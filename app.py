@@ -8,7 +8,7 @@ from PIL import Image
 import uuid
 
 # Mongo-Funktionen importieren
-from mongo_2 import load_data, save_data, delete_wishlist_entry
+from database import load_data, save_data, delete_wishlist_entry
 
 # ----------------------------
 # Initialisierung & Laden
