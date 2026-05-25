@@ -245,8 +245,34 @@ elif page == "Details":
                             st.success("Anmerkung gespeichert!")
 
                     st.markdown("**Anmerkungen:**")
-                    for note in book["Notizen"]:
-                        st.markdown(f"- _{note['Zeit']}_: {note['Text']}")
+                    for idx, note in enumerate(book["Notizen"]):
+                        edit_key = f"editing_{book['_id']}_{idx}"
+                        date_only = note['Zeit'][:10]
+                        if st.session_state.get(edit_key):
+                            updated_text = st.text_area(
+                                f"Anmerkung bearbeiten ({date_only})",
+                                value=note["Text"],
+                                key=f"edit_area_{book['_id']}_{idx}"
+                            )
+                            col_save, col_cancel = st.columns([1, 1])
+                            with col_save:
+                                if st.button("💾 Speichern", key=f"save_edit_{book['_id']}_{idx}"):
+                                    book["Notizen"][idx]["Text"] = updated_text
+                                    save_data(data)
+                                    st.session_state[edit_key] = False
+                                    st.rerun()
+                            with col_cancel:
+                                if st.button("❌ Abbrechen", key=f"cancel_edit_{book['_id']}_{idx}"):
+                                    st.session_state[edit_key] = False
+                                    st.rerun()
+                        else:
+                            col_note, col_edit = st.columns([6, 1])
+                            with col_note:
+                                st.markdown(f"- _{date_only}_: {note['Text']}")
+                            with col_edit:
+                                if st.button("✏️", key=f"edit_btn_{book['_id']}_{idx}"):
+                                    st.session_state[edit_key] = True
+                                    st.rerun()
 
 # ----------------------------
 # Speicherung (optional – hier nicht mehr zwingend nötig)
