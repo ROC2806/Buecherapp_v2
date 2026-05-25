@@ -39,19 +39,45 @@ with st.sidebar:
 # ----------------------------
 if page == "Wunschliste":
     st.header("Wunschliste")
+
+    existing_authors = sorted(set(
+        b["Autor"] for b in data["wishlist"] + data["read_books"]
+        if b.get("Autor")
+    ))
+    author_options = ["Neuer Autor..."] + existing_authors
+
+    selected_author_option = st.selectbox("Autor", author_options, key="wish_author_option")
+
+    if st.session_state.get("wish_prev_author") != selected_author_option:
+        if selected_author_option != "Neuer Autor...":
+            auto_nat = next(
+                (b.get("Nationalität", "") for b in data["wishlist"] + data["read_books"]
+                 if b.get("Autor") == selected_author_option and b.get("Nationalität")),
+                ""
+            )
+            st.session_state["wish_nationality"] = auto_nat
+        else:
+            st.session_state["wish_nationality"] = ""
+        st.session_state["wish_prev_author"] = selected_author_option
+
+    if selected_author_option == "Neuer Autor...":
+        author = st.text_input("Name des Autors", key="wish_new_author")
+    else:
+        author = selected_author_option
+
+    nationality = st.text_input("Nationalität des Autors", key="wish_nationality")
+
     with st.form("add_wish"):
         title = st.text_input("Buchtitel")
-        author = st.text_input("Autor")
         genre = st.selectbox("Genre auswählen oder eingeben", options=[
             "Roman", "Krimi & Thriller", "Fantasy & Science-Fiction", "Historisch", "Liebesgeschichte",
             "Abenteuer", "Horror & Mystery", "Biografie & Memoiren", "Sachbuch", "Ratgeber",
             "Kinder- & Jugendbuch", "Poesie & Kurzgeschichten", "Gesellschaft & Politik",
             "Spiritualität & Religion", "Klassiker", "Anderes", "Novelle", "Dystopie"
         ])
-        nationality = st.text_input("Nationalität des Autors")
         submit = st.form_submit_button("Zur Wunschliste hinzufügen")
 
-        if submit and title:
+        if submit and title and author:
             new_book = {
                 "_id": str(uuid.uuid4()),
                 "Titel": title,
