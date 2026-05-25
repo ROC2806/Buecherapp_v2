@@ -26,8 +26,8 @@ with st.sidebar:
 
     page = option_menu(
         menu_title="Navigation",
-        options=["Wunschliste", "Übersicht", "Details", "Statistik"],
-        icons=["heart", "book", "search", "bar-chart"],
+        options=["Wunschliste", "Übersicht", "Details", "Blog"],
+        icons=["heart", "book", "search", "journal-text"],
         default_index=0,
     )
 
@@ -275,6 +275,28 @@ elif page == "Details":
                                     st.rerun()
 
 # ----------------------------
-# Speicherung (optional – hier nicht mehr zwingend nötig)
+# Blog
 # ----------------------------
-# save_data(data)  # wird gezielt aufgerufen nach Änderungen
+elif page == "Blog":
+    st.header("Blog")
+
+    all_notes = []
+    for book in data["read_books"]:
+        for note in book.get("Notizen", []):
+            all_notes.append({
+                "Text": note["Text"],
+                "Datum": note["Zeit"][:10],
+                "Titel": book["Titel"],
+                "Autor": book["Autor"],
+            })
+
+    if not all_notes:
+        st.info("Noch keine Anmerkungen vorhanden.")
+    else:
+        all_notes.sort(key=lambda x: x["Datum"], reverse=True)
+
+        for note in all_notes:
+            st.markdown(f"### {note['Titel']}")
+            st.markdown(f"*{note['Autor']} · {note['Datum']}*")
+            st.markdown(note["Text"])
+            st.markdown("---")
